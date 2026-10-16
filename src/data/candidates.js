@@ -94,6 +94,7 @@ export function getCandidatesFor(office, uf = null) {
 
   if (office === 'Deputado Estadual' || office === 'Deputado Distrital') {
     return [
+      { name: 'Marcela Passamani', party: 'MDB', number: 15555, tone: 'other', color: '#ff9800', photo: null },
       { name: 'Max Maciel', party: 'PSOL', number: 50100, tone: 'other', color: '#fbc02d', photo: null },
       { name: 'Eduardo Pedrosa', party: 'UNIÃO', number: 44000, tone: 'other', color: '#1565c0', photo: null },
       { name: 'Chico Vigilante', party: 'PT', number: 13100, tone: 'red', color: '#ee2d35', photo: null },

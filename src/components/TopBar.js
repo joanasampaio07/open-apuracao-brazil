@@ -65,6 +65,27 @@ export function TopBar({ office, onOffice, theme, onToggleTheme, onSearch, onDow
     </nav>
 
     <div class="topbar-actions">
+      <button class="icon-button marcela-pill" onClick=${onOpenDf}
+        style=${{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '5px',
+          height: '32px',
+          padding: '0 12px',
+          borderRadius: '100px',
+          background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+          border: '1px solid rgba(245,158,11,0.6)',
+          color: '#fff',
+          fontSize: '0.75rem',
+          fontWeight: 700,
+          cursor: 'pointer',
+          marginRight: '6px',
+          boxShadow: '0 0 12px rgba(245,158,11,0.45)'
+        }}
+        title="Dossiê Oficial Marcela Passamani (15555 - MDB) · 16.622 votos no DF">
+        <span>⭐</span><span>Marcela Passamani (15555)</span>
+      </button>
+
       <button class="icon-button df-pill" onClick=${onOpenDf}
         style=${{
           display: 'inline-flex',

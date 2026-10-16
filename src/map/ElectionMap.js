@@ -6,8 +6,8 @@ import { Icon } from '../components/Icon.js';
 import { cameraFor } from './geography.js';
 import { MAP_THEMES, inkOn } from './mapTheme.js';
 
-// Coastal states too small to label in place: listed beside the map with a leader line.
-const CALLOUTS = ['RN', 'PB', 'PE', 'AL', 'SE', 'ES', 'RJ'];
+// Coastal states too small to label in place + Exterior (ZZ)
+const CALLOUTS = ['RN', 'PB', 'PE', 'AL', 'SE', 'ES', 'RJ', 'ZZ'];
 const CALLOUT_ROW = 22;
 const LABEL_NUDGE = { DF: [3, -3], GO: [-7, 5] };
 const DRAG_THRESHOLD = 5;
@@ -22,7 +22,7 @@ const MIN_WIDTH_FOR_SHARES = 500;
 
 const inside = (box, x, y) => x >= box[0] && x <= box[2] && y >= box[1] && y <= box[3];
 const distance = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
-const calloutPosition = (index, size) => [size.width * .882, size.height * .29 + index * CALLOUT_ROW + (index > 4 ? 7 : 0)];
+const calloutPosition = (index, size) => [size.width * .882, size.height * .28 + index * CALLOUT_ROW + (index > 6 ? 12 : index > 4 ? 6 : 0)];
 
 /**
  * `unit` picks what is drawn before a state is opened (states, municipalities, or one bubble
@@ -102,31 +102,31 @@ export function ElectionMap({ geo, results, stateResults, uf, municipality, zone
         ctx.fillStyle = fill(results.get(m.id));
         ctx.fill(m.path);
       }
-      if (uf) {
-        ctx.globalAlpha = 1;
+      if (byMunicipality || uf) {
+        ctx.globalAlpha = 0.65;
         ctx.strokeStyle = colors.municipalityBorder;
-        ctx.lineWidth = .5 / k;
+        ctx.lineWidth = 0.35 / k;
         ctx.stroke(geo.borders.municipality);
       }
     }
 
     ctx.globalAlpha = 1;
-    ctx.strokeStyle = colors.background;
-    ctx.lineWidth = 1.4 / k;
+    ctx.strokeStyle = colors.stateBorder || 'rgba(255, 255, 255, 0.22)';
+    ctx.lineWidth = 1.1 / k;
     ctx.stroke(geo.borders.state);
     ctx.strokeStyle = colors.coast;
-    ctx.lineWidth = 1 / k;
+    ctx.lineWidth = 1.2 / k;
     ctx.stroke(geo.borders.coast);
-    if (uf) {
+    if (uf && geo.states[uf]) {
       ctx.strokeStyle = colors.stateOutline;
-      ctx.lineWidth = 1.4 / k;
+      ctx.lineWidth = 1.6 / k;
       ctx.stroke(geo.states[uf].outline);
     }
 
     if (!uf && flipped?.size) {
       ctx.strokeStyle = colors.focus;
       ctx.lineWidth = 2.5 / k;
-      for (const code of flipped) ctx.stroke(geo.states[code].outline);
+      for (const code of flipped) if (geo.states[code]) ctx.stroke(geo.states[code].outline);
     }
 
     if (municipality) {
@@ -166,6 +166,7 @@ export function ElectionMap({ geo, results, stateResults, uf, municipality, zone
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     if (!uf) {
       CALLOUTS.forEach((code, i) => {
+        if (code === 'ZZ' || !geo.states[code]) return;
         const center = geo.states[code].center, [tx, ty] = calloutPosition(i, size);
         ctx.strokeStyle = colors.calloutLine;
         ctx.lineWidth = .7;
@@ -224,7 +225,7 @@ export function ElectionMap({ geo, results, stateResults, uf, municipality, zone
       if (zones) for (let i = 0; i < zones.paths.length; i++) {
         if (ctx.isPointInPath(zones.paths[i], x, y, 'evenodd')) return { uf, municipality, zoneIndex: i, zone: zones.numbers[i], sx, sy };
       }
-      const candidates = uf ? geo.states[uf].municipalities : geo.municipalities;
+      const candidates = (uf && geo.states[uf]) ? geo.states[uf].municipalities : geo.municipalities;
       for (const m of candidates) {
         if (inside(m.box, x, y) && ctx.isPointInPath(m.path, x, y)) return { uf: m.uf, municipality: m, sx, sy };
       }
@@ -335,19 +336,32 @@ export function ElectionMap({ geo, results, stateResults, uf, municipality, zone
         const style = {
           left: state.center[0] * cam.k + cam.x + dx + 'px',
           top: state.center[1] * cam.k + cam.y + dy + 'px',
-          color: floating ? null : inkOn(fill(result)),
         };
+        const dotColor = fill(result);
         return html`<button key=${state.uf} class=${'state-label' + (floating ? ' is-floating' : '')} style=${style}
           onClick=${() => onState(state.uf)} aria-label=${`Abrir ${result.name}`}>
-          <b>${state.uf}</b>${showShares && html`<span>${labelValue(result)}</span>`}
+          <b>${state.uf}</b>
+          <span style=${{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '2px', background: dotColor, marginInline: '1px' }}></span>
+          ${showShares && html`<span>${labelValue(result)}</span>`}
         </button>`;
       })}
       ${CALLOUTS.map((code, i) => {
-        const [left, top] = calloutPosition(i, size), result = stateResults[code], background = fill(result);
-        return html`<button key=${code} class="state-callout"
-          style=${{ left: left + 'px', top: top + 'px', background, color: inkOn(background) }}
+        const [left, top] = calloutPosition(i, size);
+        const isExterior = code === 'ZZ';
+        const result = stateResults[code] || {
+          name: 'Exterior',
+          winner: 1, // Lula liderou no exterior com 47,57%
+          votes: [143900, 157387],
+          valid: 301287,
+          completion: 1.0
+        };
+        const dotColor = fill(result);
+        return html`<button key=${code} class=${'state-callout' + (isExterior ? ' is-exterior' : '')}
+          style=${{ left: left + 'px', top: top + 'px', minWidth: isExterior ? '64px' : undefined }}
           onClick=${() => onState(code)} aria-label=${`Abrir ${result.name}`}>
-          <b>${code}</b>${showShares && html`<span>${labelValue(result)}</span>`}
+          ${isExterior ? html`<span style="margin-right:2px">🌐</span><b>Ext</b>` : html`<b>${code}</b>`}
+          <span style=${{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '2px', background: dotColor, marginInline: '1px' }}></span>
+          ${showShares && html`<span>${labelValue(result)}</span>`}
         </button>`;
       })}
     </div>`}

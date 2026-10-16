@@ -10,7 +10,7 @@ export const SAMPLE_MINUTES = [
   minuteAtProgress(.99), minuteAtProgress(.995),
 ].filter(minute => minute < CLOCK.end);
 
-const STATE_CODES = Object.keys(STATES);
+const STATE_CODES = Object.keys(STATES).filter(code => code !== 'ZZ');
 
 // Deterministic 0–1 noise that differs sharply between consecutive minutes.
 function noise(minute, salt) {
@@ -70,8 +70,8 @@ export function stateFlips(samples, minute, currentStates) {
   const flips = [];
   for (let i = 1; i < moments.length; i++) {
     for (const uf of STATE_CODES) {
-      const before = moments[i - 1].states[uf].winner, after = moments[i].states[uf].winner;
-      if (before !== after) flips.push({ minute: Math.round(moments[i].minute), uf, winner: after });
+      const before = moments[i - 1].states[uf]?.winner, after = moments[i].states[uf]?.winner;
+      if (before != null && after != null && before !== after) flips.push({ minute: Math.round(moments[i].minute), uf, winner: after });
     }
   }
   return flips.reverse();

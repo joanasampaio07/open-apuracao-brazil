@@ -103,22 +103,23 @@ export function createGeography(topology, zoneData) {
   return { municipalities, states, borders, box:allBox, zonesFor, zoneMeta:zoneData.m, byId:new Map(municipalities.map(m=>[m.id,m])) };
 }
 export function cameraFor(geo, uf, municipality, width, height) {
-  let box=municipality?.box || (uf ? geo.states[uf].box : geo.box);
-  const zones=municipality && geo.zonesFor(municipality.id);
-  if(zones) {
-    const focus=zones.focusBox;
-    const radius=Math.min(Math.max(zones.box[2]-zones.box[0],zones.box[3]-zones.box[1])*.6,
-      Math.max(focus[2]-focus[0],focus[3]-focus[1])*.8+6);
-    const x=(focus[0]+focus[2])/2,y=(focus[1]+focus[3])/2;
-    box=[x-radius,y-radius,x+radius,y+radius];
-  } else if(uf&&!municipality) {
-    const margin=Math.max(box[2]-box[0],box[3]-box[1])*.08;
-    box=[box[0]-margin,box[1]-margin,box[2]+margin,box[3]+margin];
+  const hasState = uf && geo.states[uf];
+  let box = municipality?.box || (hasState ? geo.states[uf].box : geo.box);
+  const zones = municipality && geo.zonesFor(municipality.id);
+  if (zones) {
+    const focus = zones.focusBox;
+    const radius = Math.min(Math.max(zones.box[2] - zones.box[0], zones.box[3] - zones.box[1]) * .6,
+      Math.max(focus[2] - focus[0], focus[3] - focus[1]) * .8 + 6);
+    const x = (focus[0] + focus[2]) / 2, y = (focus[1] + focus[3]) / 2;
+    box = [x - radius, y - radius, x + radius, y + radius];
+  } else if (hasState && !municipality) {
+    const margin = Math.max(box[2] - box[0], box[3] - box[1]) * .08;
+    box = [box[0] - margin, box[1] - margin, box[2] + margin, box[3] + margin];
   }
-  const padding=zones?0:municipality?.12:uf?0:.025;
-  const bx=box[2]-box[0],by=box[3]-box[1],cx=(box[0]+box[2])/2,cy=(box[1]+box[3])/2;
-  const usableWidth=width*(uf ? 1 : .89),usableHeight=height*(uf ? 1 : .94);
-  const k=Math.min(usableWidth/(bx*(1+padding*2)),usableHeight/(by*(1+padding*2)));
-  const screenX=uf?width*.5:width*.44,screenY=height*.5;
-  return { k, x:screenX-cx*k, y:screenY-cy*k };
+  const padding = zones ? 0 : municipality ? .12 : hasState ? 0 : .025;
+  const bx = box[2] - box[0], by = box[3] - box[1], cx = (box[0] + box[2]) / 2, cy = (box[1] + box[3]) / 2;
+  const usableWidth = width * (hasState ? 1 : .89), usableHeight = height * (hasState ? 1 : .94);
+  const k = Math.min(usableWidth / (bx * (1 + padding * 2)), usableHeight / (by * (1 + padding * 2)));
+  const screenX = hasState ? width * .5 : width * .44, screenY = height * .5;
+  return { k, x: screenX - cx * k, y: screenY - cy * k };
 }

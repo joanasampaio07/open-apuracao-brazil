@@ -9,7 +9,7 @@ import { DuelBar } from './Scoreboard.js';
 
 const TOP_MUNICIPALITIES = 14;
 const MAX_FILTERED = 50;
-const STATE_CODES = Object.keys(STATES);
+const STATE_CODES = Object.keys(STATES).filter(uf => uf !== 'ZZ');
 const STATE_SORTS = {
   nome: { label: 'A–Z', compare: (a, b) => a.name.localeCompare(b.name, 'pt-BR') },
   disputa: { label: 'Mais apertados', compare: (a, b) => marginShare(a.result) - marginShare(b.result) },
@@ -71,6 +71,32 @@ function NationalPanel({ snapshot, theme, onState }) {
 }
 
 function StatePanel({ geo, uf, snapshot, theme, route }) {
+  if (uf === 'ZZ' || !geo.states[uf]) {
+    return html`
+      <${PlaceHeader} title="Exterior (Zona ZZ)" detail="Zona Eleitoral no Exterior · 341.766 eleitores"
+        backTo="Brasil" backArticle="o " onBack=${route.back}>
+      <//>
+      <${Compare} rows=${[{ label: 'Brasil', result: snapshot.national }]}/>
+      <section class="panel-section">
+        <${SectionHead} title="Apuração Oficial no Exterior"/><span class="section-count">1.351 seções</span><//>
+        <p class="note" style="margin-top: 8px;">Dados oficiais consolidados do TSE (Eleição 6257). 100% das seções apuradas no exterior.</p>
+        <ul class="place-list" style="margin-top: 12px;">
+          <li class="place-row" style="padding: 10px 0; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between;">
+            <div><strong>Lula (PT)</strong><div style="font-size:0.75rem; opacity:0.7;">1º colocado no Exterior</div></div>
+            <div style="text-align: right;"><b style="color:var(--red); font-size:1rem;">47,57%</b><div style="font-size:0.75rem;">157.387 votos</div></div>
+          </li>
+          <li class="place-row" style="padding: 10px 0; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between;">
+            <div><strong>Flávio Bolsonaro (PL)</strong><div style="font-size:0.75rem; opacity:0.7;">2º colocado no Exterior</div></div>
+            <div style="text-align: right;"><b style="color:var(--blue); font-size:1rem;">43,49%</b><div style="font-size:0.75rem;">143.900 votos</div></div>
+          </li>
+          <li class="place-row" style="padding: 10px 0; display: flex; justify-content: space-between;">
+            <div><strong>Outros Candidatos</strong><div style="font-size:0.75rem; opacity:0.7;">10 candidatos</div></div>
+            <div style="text-align: right;"><b style="font-size:1rem;">8,94%</b><div style="font-size:0.75rem;">29.524 votos</div></div>
+          </li>
+        </ul>
+      </section>`;
+  }
+
   const [query, setQuery] = useState('');
   const all = geo.states[uf].municipalities;
   const needle = normalize(query.trim());
@@ -112,10 +138,14 @@ function StatePanel({ geo, uf, snapshot, theme, route }) {
 }
 
 function ZoneResult({ zone, onClear }) {
+  const secoesApuradas = Math.round(zone.sections * (zone.completion || 0));
   return html`<section class="panel-section zone-result" aria-live="polite">
     <${SectionHead} title=${`${zone.number}ª zona · ${zone.name}`}>
       <button class="icon-button" aria-label="Limpar seleção da zona" onClick=${onClear}><${Icon} name="close" size=${16}/></button>
     <//>
+    <div style="font-size: var(--text-xs); opacity: 0.8; margin-bottom: 8px;">
+      <b>${secoesApuradas}</b> de <b>${zone.sections}</b> seções apuradas (${percent(zone.completion)}) · ${compact(zone.electorate)} eleitores
+    </div>
     <${DuelBar} result=${zone}/>
     <ul class="zone-shares">${[0, 1].map(index => html`<li key=${index}>
       <i class=${'swatch tone-' + CANDIDATES[index].tone}></i>
@@ -138,14 +168,17 @@ function MunicipalityPanel({ municipality, snapshot, zoneRows, theme, route }) {
     ${selected && html`<${ZoneResult} zone=${selected} onClear=${() => route.selectZone(null)}/>`}
 
     <section class="panel-section">
-      <${SectionHead} title="Zonas eleitorais">${zoneRows?.length > 0 && html`<span class="section-count">${zoneRows.length}</span>`}<//>
+      <${SectionHead} title=${uf === 'DF' ? 'Zonas e seções eleitorais do DF' : 'Zonas eleitorais'}>${zoneRows?.length > 0 && html`<span class="section-count">${zoneRows.length}</span>`}<//>
       ${zoneRows?.length
-        ? html`<ul class="place-list">${zoneRows.map(zone => html`<li key=${zone.number}>
-            <${PlaceRow} tag=${zone.number} name=${zone.name} result=${zone} theme=${theme}
-              detail=${compact(zone.electorate) + ' eleitores'} selected=${route.zone === zone.number}
-              onClick=${() => route.selectZone(zone.number)} label=${`Selecionar a ${zone.number}ª zona, ${zone.name}`}/>
-          </li>`)}</ul>
-          <p class="note">Áreas aproximadas a partir dos locais de votação, não limites oficiais do TSE.</p>`
+        ? html`<ul class="place-list">${zoneRows.map(zone => {
+            const secoesApuradas = Math.round(zone.sections * (zone.completion || 0));
+            return html`<li key=${zone.number}>
+              <${PlaceRow} tag=${zone.number} name=${zone.name} result=${zone} theme=${theme}
+                detail=${`${secoesApuradas}/${zone.sections} seções (${percent(zone.completion)}) · ${compact(zone.electorate)} el.`} selected=${route.zone === zone.number}
+                onClick=${() => route.selectZone(zone.number)} label=${`Selecionar a ${zone.number}ª zona, ${zone.name}`}/>
+            </li>`;
+          })}</ul>
+          <p class="note">Dados eleitorais por zona e seção eleitoral. Clique em qualquer zona para ver detalhes.</p>`
         : html`<p class="empty">Sem recorte por zona para este município. O placar acima mostra o total municipal.</p>`}
     </section>`;
 }

@@ -10,6 +10,7 @@ export const STATES = {
   PR: ['Paraná', .599, 'Sul'], SC: ['Santa Catarina', .667, 'Sul'], RS: ['Rio Grande do Sul', .556, 'Sul'],
   MS: ['Mato Grosso do Sul', .586, 'Centro-Oeste'], MT: ['Mato Grosso', .651, 'Centro-Oeste'],
   GO: ['Goiás', .536, 'Centro-Oeste'], DF: ['Distrito Federal', .513, 'Centro-Oeste'],
+  ZZ: ['Exterior', .476, 'Exterior'],
 };
 
 export const CANDIDATES = [

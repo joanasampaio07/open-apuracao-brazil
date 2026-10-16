@@ -3,7 +3,7 @@ import { CLOCK } from '../data/clock.js';
 import { OFFICES, STATES } from '../data/mocks.js';
 import { normalize } from '../lib/format.js';
 
-export const MAP_UNITS = ['estados', 'municipios', 'eleitorado'];
+export const MAP_UNITS = ['municipios', 'estados', 'eleitorado'];
 export const MAP_METRICS = ['lider', 'apurado'];
 
 // The whole view is a link: #UF/municipalityId/zone?cargo=senado&hora=20h15&mapa=municipios&cor=apurado

@@ -72,6 +72,7 @@ main {
 
 .workspace.is-wide {
   grid-template-columns: var(--insights-width) minmax(0, 1fr) var(--panel-width);
+  gap: var(--space-2);
 }
 
 .insights-column {
@@ -82,18 +83,28 @@ main {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  padding: var(--space-3) var(--space-5) var(--space-4);
+  min-height: 620px;
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  background: radial-gradient(110% 90% at 52% 48%, #191815 0%, #100f0d 55%, #090807 100%);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.6);
 }
 
 /* The map frame is square; the area around it decides how big the square can be. */
 .map-area {
-  display: grid;
-  place-items: center;
-  container-type: inline-size;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1 1 auto;
+  min-height: 520px;
+  padding: var(--space-4) 0 var(--space-2);
 }
 
 .map-frame {
-  width: min(100cqw, 640px);
+  width: min(100%, 780px);
+  max-width: 840px;
+  min-height: 520px;
 }
 
 .panel {

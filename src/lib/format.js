@@ -1,12 +1,19 @@
 const integer = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
-const decimal = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const decimal1 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const decimal2 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export const int = value => integer.format(Math.round(value));
-export const percent = (ratio, digits = 1) => (digits ? decimal.format(ratio * 100) : int(ratio * 100)) + '%';
-export const points = ratio => decimal.format(ratio * 100) + ' pts';
+export const percent = (ratio, digits = 2) => {
+  if (ratio == null || isNaN(ratio)) return '0,00%';
+  if (digits === 0) return integer.format(Math.round(ratio * 100)) + '%';
+  if (digits === 1) return decimal1.format(ratio * 100) + '%';
+  return decimal2.format(ratio * 100) + '%';
+};
+
+export const points = ratio => decimal2.format(ratio * 100) + ' pts';
 
 export function compact(value) {
-  if (value >= 1e6) return decimal.format(value / 1e6) + ' mi';
+  if (value >= 1e6) return decimal2.format(value / 1e6) + ' mi';
   if (value >= 1e3) return int(value / 1e3) + ' mil';
   return int(value);
 }

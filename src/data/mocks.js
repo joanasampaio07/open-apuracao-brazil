@@ -18,7 +18,7 @@ export const CANDIDATES = [
   { name: 'Lula', party: 'PT', number: 13, tone: 'red', color: '#ee2d35', photo: '/images/lula.webp' },
   { name: 'Outros candidatos', party: '', tone: 'other', color: '#8c8577', photo: null },
 ];
-export const OFFICES = ['Presidente', 'Governadores', 'Senado', 'Deputados'];
+export const OFFICES = ['Presidente', 'Governadores', 'Senado', 'Deputado Federal', 'Deputado Estadual'];
 export const REGIONS = ['Norte', 'Nordeste', 'Centro-Oeste', 'Sudeste', 'Sul'];
 // Hand-set results for some zones of São Paulo's capital in the presidential race:
 // [leader's share of valid votes in %, leading candidate index].
@@ -62,7 +62,7 @@ export function municipalityResult(municipality, minute = 1269, office = 'Presid
   if (municipality.id === '3550308') blue = .438;
   if (office === 'Governadores') blue += (hash(municipality.uf + 'gov') - .5) * .29;
   if (office === 'Senado') blue += (hash(municipality.id + 'sen') - .5) * .17;
-  if (office === 'Deputados') blue += (hash(municipality.id + 'dep') - .5) * .28;
+  if (office.includes('Deputado') || office === 'Deputados') blue += (hash(municipality.id + 'dep') - .5) * .28;
   blue += Math.sin(minute / 39 + seed * 7) * .013 * (1 - progressAt(minute));
   blue += blueAdjustment;
   const completion = Math.min(1, progressAt(minute) ** countPace(municipality.id));

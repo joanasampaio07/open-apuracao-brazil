@@ -17,6 +17,7 @@ import { SearchDialog } from './components/SearchDialog.js';
 import { SidePanel } from './components/SidePanel.js';
 import { TopBar } from './components/TopBar.js';
 import { TseDialog } from './components/TseDialog.js';
+import { DfDistritaisDialog } from './components/DfDistritaisDialog.js';
 
 // The capital's presidential zones have hand-set shares, so the state calibration skips it.
 const FIXED_CAPITAL = '3550308';
@@ -56,6 +57,7 @@ export function App({ geo }) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [is3d, setIs3d] = useState(true); // Default to 3D view as requested
   const [tseOpen, setTseOpen] = useState(false);
+  const [dfOpen, setDfOpen] = useState(false);
   const [tseMode, setTseMode] = useState(tse.getMode());
   const [electionId, setElectionId] = useState(tse.getElectionId());
   const [tseData, setTseData] = useState(tse.lastData);
@@ -143,7 +145,8 @@ export function App({ geo }) {
     <${TopBar} office=${office} onOffice=${route.setOffice} theme=${theme} onToggleTheme=${toggleTheme}
       onSearch=${() => setSearching(true)} onDownload=${saveMap} tseMode=${tseMode} onOpenTse=${() => setTseOpen(true)}
       electionId=${electionId} onElection=${id => tse.setElectionId(id)}
-      onExterior=${() => navigation.openState('ZZ')}/>
+      onExterior=${() => navigation.openState('ZZ')}
+      onOpenDf=${() => setDfOpen(true)} uf=${uf}/>
 
     <main>
       <${Scoreboard} office=${office} uf=${uf} scope=${scope.name} result=${scope.result} majorityRule=${office === OFFICES[0] && !uf}
@@ -164,5 +167,7 @@ export function App({ geo }) {
       onMunicipality=${navigation.openMunicipality} onClose=${() => setSearching(false)}/>`}
 
     ${tseOpen && html`<${TseDialog} onClose=${() => setTseOpen(false)}/>`}
+
+    ${dfOpen && html`<${DfDistritaisDialog} onClose=${() => setDfOpen(false)}/>`}
   </div>`;
 }

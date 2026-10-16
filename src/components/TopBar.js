@@ -2,7 +2,7 @@ import { html } from '../lib/html.js';
 import { OFFICES } from '../data/mocks.js';
 import { Icon } from './Icon.js';
 
-export function TopBar({ office, onOffice, theme, onToggleTheme, onSearch, onDownload, tseMode, onOpenTse, electionId, onElection, onExterior }) {
+export function TopBar({ office, onOffice, theme, onToggleTheme, onSearch, onDownload, tseMode, onOpenTse, electionId, onElection, onExterior, onOpenDf, uf }) {
   const nextTheme = theme === 'dark' ? 'claro' : 'escuro';
   const isLive = tseMode === 'ao-vivo';
 
@@ -57,11 +57,33 @@ export function TopBar({ office, onOffice, theme, onToggleTheme, onSearch, onDow
     </div>
 
     <nav class="office-tabs" aria-label="Cargo">
-      ${OFFICES.map(name => html`<button key=${name} class="office-tab" aria-pressed=${name === office}
-        onClick=${() => onOffice(name)}>${name}</button>`)}
+      ${OFFICES.map(name => {
+        const label = (uf === 'DF' && name === 'Deputado Estadual') ? 'Deputado Distrital' : name;
+        return html`<button key=${name} class="office-tab" aria-pressed=${name === office}
+          onClick=${() => onOffice(name)}>${label}</button>`;
+      })}
     </nav>
 
     <div class="topbar-actions">
+      <button class="icon-button df-pill" onClick=${onOpenDf}
+        style=${{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '5px',
+          height: '32px',
+          padding: '0 10px',
+          borderRadius: '100px',
+          background: 'rgba(33, 150, 243, 0.15)',
+          border: '1px solid rgba(33, 150, 243, 0.35)',
+          color: '#60a5fa',
+          fontSize: '0.75rem',
+          fontWeight: 600,
+          cursor: 'pointer',
+          marginRight: '4px'
+        }}
+        title="Ver todas as 35 RAs do DF e votação detalhada por seção eleitoral">
+        <span>🏛️</span><span>DF: 35 RAs & Seções</span>
+      </button>
       <button class="icon-button exterior-pill" onClick=${onExterior}
         style=${{
           display: 'inline-flex',
